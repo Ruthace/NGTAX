@@ -396,95 +396,66 @@
       <p>&copy; 2025 NGTaxCalc. For informational purposes only. Consult a tax professional for advice.</p>
     </div>
   </footer>
+  
+<script>
+  function calculateTax() {
+    const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+    const pensionField = document.getElementById('pension');
+    const pensionAmount = parseFloat(pensionField.value) || (income * 0.08);
+    pensionField.value = pensionAmount.toFixed(2); // auto-update visible field
 
-  <script>
-    function calculateTax() {
-      const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
-      const pensionAmount = parseFloat(document.getElementById('pension').value) || (income * 0.08);
-      const nhisAmount = parseFloat(document.getElementById('nhis').value) || 0;
-      const nhfAmount = parseFloat(document.getElementById('nhf').value) || (income * 0.025);
-      const lifeInsuranceAmount = parseFloat(document.getElementById('lifeInsurance').value) || 0;
-      const mortgageAmount = parseFloat(document.getElementById('mortgage').value) || 0;
-      
-      const cra = Math.max(income * 12 * 0.01, 200000 + (income * 12 * 0.20));
-      const totalDeductions = (pensionAmount * 12) + (nhisAmount * 12) + (nhfAmount * 12) + 
-                             (lifeInsuranceAmount * 12) + (mortgageAmount * 12) + cra;
-      const annualGross = income * 12;
-      const taxableIncome = Math.max(0, annualGross - totalDeductions);
-      
-      let tax = 0;
-      
-      if (taxableIncome <= 300000) {
-        tax = taxableIncome * 0.07;
-      } else if (taxableIncome <= 600000) {
-        tax = (300000 * 0.07) + ((taxableIncome - 300000) * 0.11);
-      } else if (taxableIncome <= 1100000) {
-        tax = (300000 * 0.07) + (300000 * 0.11) + ((taxableIncome - 600000) * 0.15);
-      } else if (taxableIncome <= 1600000) {
-        tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + ((taxableIncome - 1100000) * 0.19);
-      } else if (taxableIncome <= 3200000) {
-        tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + 
-              ((taxableIncome - 1600000) * 0.21);
-      } else {
-        tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + 
-              (1600000 * 0.21) + ((taxableIncome - 3200000) * 0.24);
-      }
-      
-      const monthlyTax = tax / 12;
-      const netMonthly = income - monthlyTax - pensionAmount - nhisAmount - nhfAmount - 
-                         lifeInsuranceAmount - mortgageAmount;
-      
-      const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      
-      document.getElementById('resultsContent').innerHTML = `
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Monthly Gross Income:</span>
-          <span class="font-semibold">${formatCurrency(income)}</span>
-        </div>
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Total Deductions:</span>
-          <span class="font-semibold">${formatCurrency(totalDeductions / 12)}</span>
-        </div>
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Taxable Income:</span>
-          <span class="font-semibold">${formatCurrency(taxableIncome / 12)}</span>
-        </div>
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Annual Taxable Income:</span>
-          <span class="font-semibold">${formatCurrency(taxableIncome)}</span>
-        </div>
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Monthly PAYE Tax:</span>
-          <span class="font-semibold">${formatCurrency(monthlyTax)}</span>
-        </div>
-        <div class="flex justify-between py-3 border-b border-emerald-200">
-          <span class="text-gray-700">Annual Tax:</span>
-          <span class="font-semibold">${formatCurrency(tax)}</span>
-        </div>
-        <div class="flex justify-between py-4 text-lg">
-          <span class="font-semibold text-emerald-600">Net Monthly Income:</span>
-          <span class="font-bold text-emerald-600">${formatCurrency(netMonthly)}</span>
-        </div>
-      `;
-      
-      document.getElementById('printDate').textContent = 'Calculation Date: ' + new Date().toLocaleDateString('en-NG', { year: 'numeric', month: 'long', day: 'numeric' });
-      
-      document.getElementById('results').classList.remove('hidden');
-      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      
-      window.calculationResults = {
-        income, totalDeductions: totalDeductions / 12, taxableIncome: taxableIncome / 12,
-        annualTaxable: taxableIncome, monthlyTax, annualTax: tax, netIncome: netMonthly
-      };
-    }
+    const nhisAmount = parseFloat(document.getElementById('nhis').value) || 0;
+    const nhfAmount = parseFloat(document.getElementById('nhf').value) || (income * 0.025);
+    const lifeInsuranceAmount = parseFloat(document.getElementById('lifeInsurance').value) || 0;
+    const mortgageAmount = parseFloat(document.getElementById('mortgage').value) || 0;
     
-    function saveResults() {
-      if (!window.calculationResults) return;
-      
-      const r = window.calculationResults;
-      const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      
-      const resultText = `
+    const cra = Math.max(income * 12 * 0.01, 200000 + (income * 12 * 0.20));
+    const totalDeductions = (pensionAmount * 12) + (nhisAmount * 12) + (nhfAmount * 12) + 
+                           (lifeInsuranceAmount * 12) + (mortgageAmount * 12) + cra;
+    const annualGross = income * 12;
+    const taxableIncome = Math.max(0, annualGross - totalDeductions);
+    
+    let tax = 0;
+    if (taxableIncome <= 300000) tax = taxableIncome * 0.07;
+    else if (taxableIncome <= 600000) tax = (300000 * 0.07) + ((taxableIncome - 300000) * 0.11);
+    else if (taxableIncome <= 1100000) tax = (300000 * 0.07) + (300000 * 0.11) + ((taxableIncome - 600000) * 0.15);
+    else if (taxableIncome <= 1600000) tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + ((taxableIncome - 1100000) * 0.19);
+    else if (taxableIncome <= 3200000) tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + ((taxableIncome - 1600000) * 0.21);
+    else tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + (1600000 * 0.21) + ((taxableIncome - 3200000) * 0.24);
+    
+    const monthlyTax = tax / 12;
+    const netMonthly = income - monthlyTax - pensionAmount - nhisAmount - nhfAmount - lifeInsuranceAmount - mortgageAmount;
+    
+    const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    document.getElementById('resultsContent').innerHTML = `
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Monthly Gross Income:</span><span class="font-semibold">${formatCurrency(income)}</span></div>
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Total Deductions:</span><span class="font-semibold">${formatCurrency(totalDeductions / 12)}</span></div>
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Taxable Income:</span><span class="font-semibold">${formatCurrency(taxableIncome / 12)}</span></div>
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Annual Taxable Income:</span><span class="font-semibold">${formatCurrency(taxableIncome)}</span></div>
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Monthly PAYE Tax:</span><span class="font-semibold">${formatCurrency(monthlyTax)}</span></div>
+      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Annual Tax:</span><span class="font-semibold">${formatCurrency(tax)}</span></div>
+      <div class="flex justify-between py-4 text-lg"><span class="font-semibold text-emerald-600">Net Monthly Income:</span><span class="font-bold text-emerald-600">${formatCurrency(netMonthly)}</span></div>
+    `;
+    
+    document.getElementById('printDate').textContent = 'Calculation Date: ' + new Date().toLocaleDateString('en-NG', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('results').classList.remove('hidden');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+    
+    window.calculationResults = { income, totalDeductions: totalDeductions / 12, taxableIncome: taxableIncome / 12, annualTaxable: taxableIncome, monthlyTax, annualTax: tax, netIncome: netMonthly };
+  }
+
+  // Auto-calculate pension on income input
+  document.getElementById('monthlyIncome').addEventListener('input', () => {
+    const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+    document.getElementById('pension').value = (income * 0.08).toFixed(2);
+  });
+
+  function saveResults() {
+    if (!window.calculationResults) return;
+    const r = window.calculationResults;
+    const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const resultText = `
 NIGERIA TAX CALCULATION RESULTS
 ================================
 Date: ${new Date().toLocaleDateString('en-NG')}
@@ -511,19 +482,39 @@ Net Annual Income: ${formatCurrency(r.netIncome * 12)}
 
 ================================
 Generated by NGTaxCalc - For informational purposes only
-      `;
-      
-      const blob = new Blob([resultText], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `tax-calculation-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
+    `;
+    const blob = new Blob([resultText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tax-calculation-${new Date().toISOString().split('T')[0]}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // FAQ toggle function
+  function toggleFaq(index) {
+    const answers = document.querySelectorAll('.faq-answer');
+    const icons = document.querySelectorAll('.faq-icon');
+    answers.forEach((ans, i) => {
+      if (i === index) {
+        ans.classList.toggle('hidden');
+        icons[i].textContent = ans.classList.contains('hidden') ? '⌄' : '⌃';
+      } else {
+        ans.classList.add('hidden');
+        icons[i].textContent = '⌄';
+      }
+    });
+  }
+</script>
+
+ 
+       
+          
+
     
-    function toggleFaq(index) {
-      const answers = document.querySelectorAll('.faq-answer');
-      const icons = 
+   
+        
+      
+    
+     
