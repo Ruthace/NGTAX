@@ -587,7 +587,17 @@
       viewMode = viewMode === 'annual' ? 'monthly' : 'annual';
       displayResults();
     }
-
+    
+    function toggleFaq(index) {
+  const answers = document.querySelectorAll('.faq-answer');
+  const icons = document.querySelectorAll('.faq-icon');
+  
+  answers[index].classList.toggle('hidden');
+  icons[index].style.transform = answers[index].classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+</script>
+</body>
+</html>
   
     
  
