@@ -101,7 +101,7 @@
                 <input
                   type="number"
                   id="pension"
-                  placeholder="8% of monthly income (auto-calculated)"
+                  placeholder="8% of monthly income"
                   class="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none transition"
                   min="0"
                 />
@@ -396,118 +396,203 @@
       <p>&copy; 2025 NGTaxCalc. For informational purposes only. Consult a tax professional for advice.</p>
     </div>
   </footer>
-  
-<script>
-  function calculateTax() {
-    const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
-    const pensionField = document.getElementById('pension');
-    const pensionAmount = parseFloat(pensionField.value) || (income * 0.08);
-    pensionField.value = pensionAmount.toFixed(2); // auto-update visible field
 
-    const nhisAmount = parseFloat(document.getElementById('nhis').value) || 0;
-    const nhfAmount = parseFloat(document.getElementById('nhf').value) || (income * 0.025);
-    const lifeInsuranceAmount = parseFloat(document.getElementById('lifeInsurance').value) || 0;
-    const mortgageAmount = parseFloat(document.getElementById('mortgage').value) || 0;
+  <script>
+    let viewMode = 'annual'; // 'annual' or 'monthly'
     
-    const cra = Math.max(income * 12 * 0.01, 200000 + (income * 12 * 0.20));
-    const totalDeductions = (pensionAmount * 12) + (nhisAmount * 12) + (nhfAmount * 12) + 
-                           (lifeInsuranceAmount * 12) + (mortgageAmount * 12) + cra;
-    const annualGross = income * 12;
-    const taxableIncome = Math.max(0, annualGross - totalDeductions);
-    
-    let tax = 0;
-    if (taxableIncome <= 300000) tax = taxableIncome * 0.07;
-    else if (taxableIncome <= 600000) tax = (300000 * 0.07) + ((taxableIncome - 300000) * 0.11);
-    else if (taxableIncome <= 1100000) tax = (300000 * 0.07) + (300000 * 0.11) + ((taxableIncome - 600000) * 0.15);
-    else if (taxableIncome <= 1600000) tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + ((taxableIncome - 1100000) * 0.19);
-    else if (taxableIncome <= 3200000) tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + ((taxableIncome - 1600000) * 0.21);
-    else tax = (300000 * 0.07) + (300000 * 0.11) + (500000 * 0.15) + (500000 * 0.19) + (1600000 * 0.21) + ((taxableIncome - 3200000) * 0.24);
-    
-    const monthlyTax = tax / 12;
-    const netMonthly = income - monthlyTax - pensionAmount - nhisAmount - nhfAmount - lifeInsuranceAmount - mortgageAmount;
-    
-    const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
-    document.getElementById('resultsContent').innerHTML = `
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Monthly Gross Income:</span><span class="font-semibold">${formatCurrency(income)}</span></div>
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Total Deductions:</span><span class="font-semibold">${formatCurrency(totalDeductions / 12)}</span></div>
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Taxable Income:</span><span class="font-semibold">${formatCurrency(taxableIncome / 12)}</span></div>
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Annual Taxable Income:</span><span class="font-semibold">${formatCurrency(taxableIncome)}</span></div>
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Monthly PAYE Tax:</span><span class="font-semibold">${formatCurrency(monthlyTax)}</span></div>
-      <div class="flex justify-between py-3 border-b border-emerald-200"><span>Annual Tax:</span><span class="font-semibold">${formatCurrency(tax)}</span></div>
-      <div class="flex justify-between py-4 text-lg"><span class="font-semibold text-emerald-600">Net Monthly Income:</span><span class="font-bold text-emerald-600">${formatCurrency(netMonthly)}</span></div>
-    `;
-    
-    document.getElementById('printDate').textContent = 'Calculation Date: ' + new Date().toLocaleDateString('en-NG', { year: 'numeric', month: 'long', day: 'numeric' });
-    document.getElementById('results').classList.remove('hidden');
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-    
-    window.calculationResults = { income, totalDeductions: totalDeductions / 12, taxableIncome: taxableIncome / 12, annualTaxable: taxableIncome, monthlyTax, annualTax: tax, netIncome: netMonthly };
-  }
-
-  // Auto-calculate pension on income input
-  document.getElementById('monthlyIncome').addEventListener('input', () => {
-    const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
-    document.getElementById('pension').value = (income * 0.08).toFixed(2);
-  });
-
-  function saveResults() {
-    if (!window.calculationResults) return;
-    const r = window.calculationResults;
-    const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const resultText = `
-NIGERIA TAX CALCULATION RESULTS
-================================
-Date: ${new Date().toLocaleDateString('en-NG')}
-
-INCOME DETAILS:
-Monthly Gross Income: ${formatCurrency(r.income)}
-Annual Gross Income: ${formatCurrency(r.income * 12)}
-
-DEDUCTIONS:
-Total Monthly Deductions: ${formatCurrency(r.totalDeductions)}
-Total Annual Deductions: ${formatCurrency(r.totalDeductions * 12)}
-
-TAXABLE INCOME:
-Monthly Taxable Income: ${formatCurrency(r.taxableIncome)}
-Annual Taxable Income: ${formatCurrency(r.annualTaxable)}
-
-TAX CALCULATION:
-Monthly PAYE Tax: ${formatCurrency(r.monthlyTax)}
-Annual PAYE Tax: ${formatCurrency(r.annualTax)}
-
-NET INCOME:
-Net Monthly Income: ${formatCurrency(r.netIncome)}
-Net Annual Income: ${formatCurrency(r.netIncome * 12)}
-
-================================
-Generated by NGTaxCalc - For informational purposes only
-    `;
-    const blob = new Blob([resultText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tax-calculation-${new Date().toISOString().split('T')[0]}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // FAQ toggle function
-  function toggleFaq(index) {
-    const answers = document.querySelectorAll('.faq-answer');
-    const icons = document.querySelectorAll('.faq-icon');
-    answers.forEach((ans, i) => {
-      if (i === index) {
-        ans.classList.toggle('hidden');
-        icons[i].textContent = ans.classList.contains('hidden') ? '⌄' : '⌃';
+    function calculateTax() {
+      const income = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+      const pensionAmount = parseFloat(document.getElementById('pension').value) || (income * 0.08);
+      const nhisAmount = parseFloat(document.getElementById('nhis').value) || 0;
+      const nhfAmount = parseFloat(document.getElementById('nhf').value) || (income * 0.025);
+      const lifeInsuranceAmount = parseFloat(document.getElementById('lifeInsurance').value) || 0;
+      const mortgageAmount = parseFloat(document.getElementById('mortgage').value) || 0;
+      
+      // Calculate annual values
+      const annualGross = income * 12;
+      const annualPension = pensionAmount * 12;
+      const annualNhis = nhisAmount * 12;
+      const annualNhf = nhfAmount * 12;
+      const annualLifeInsurance = lifeInsuranceAmount * 12;
+      const annualMortgage = mortgageAmount * 12;
+      
+      // Calculate taxable income (gross income only, no CRA)
+      const taxableIncome = annualGross;
+      
+      // Calculate tax progressively on taxable income using NEW TAX LAW
+      let annualTax = 0;
+      
+      if (taxableIncome <= 800000) {
+        // First ₦800,000 @ 0%
+        annualTax = 0;
+      } else if (taxableIncome <= 3000000) {
+        // First ₦800,000 @ 0%
+        // Next ₦2,200,000 @ 15%
+        annualTax = (Math.min(taxableIncome - 800000, 2200000)) * 0.15;
+      } else if (taxableIncome <= 12000000) {
+        // First ₦800,000 @ 0%
+        // Next ₦2,200,000 @ 15%
+        // Next ₦9,000,000 @ 18%
+        annualTax = (2200000 * 0.15) + ((Math.min(taxableIncome - 3000000, 9000000)) * 0.18);
+      } else if (taxableIncome <= 25000000) {
+        // First ₦800,000 @ 0%
+        // Next ₦2,200,000 @ 15%
+        // Next ₦9,000,000 @ 18%
+        // Next ₦13,000,000 @ 21%
+        annualTax = (2200000 * 0.15) + (9000000 * 0.18) + ((Math.min(taxableIncome - 12000000, 13000000)) * 0.21);
+      } else if (taxableIncome <= 50000000) {
+        // First ₦800,000 @ 0%
+        // Next ₦2,200,000 @ 15%
+        // Next ₦9,000,000 @ 18%
+        // Next ₦13,000,000 @ 21%
+        // Next ₦25,000,000 @ 23%
+        annualTax = (2200000 * 0.15) + (9000000 * 0.18) + (13000000 * 0.21) + ((Math.min(taxableIncome - 25000000, 25000000)) * 0.23);
       } else {
-        ans.classList.add('hidden');
-        icons[i].textContent = '⌄';
+        // First ₦800,000 @ 0%
+        // Next ₦2,200,000 @ 15%
+        // Next ₦9,000,000 @ 18%
+        // Next ₦13,000,000 @ 21%
+        // Next ₦25,000,000 @ 23%
+        // Above ₦50,000,000 @ 25%
+        annualTax = (2200000 * 0.15) + (9000000 * 0.18) + (13000000 * 0.21) + (25000000 * 0.23) + ((taxableIncome - 50000000) * 0.25);
       }
-    });
-  }
-</script>
+      
+      // Calculate monthly equivalents
+      const monthlyTax = annualTax / 12;
+      
+      // Calculate net income
+      const annualNetIncome = annualGross - annualTax - annualPension - annualNhis - annualNhf - annualLifeInsurance - annualMortgage;
+      const monthlyNetIncome = annualNetIncome / 12;
+      
+      // Store results for later use
+      window.calculationResults = {
+        annualGross,
+        monthlyGross: income,
+        annualTax,
+        monthlyTax,
+        annualPension,
+        monthlyPension: pensionAmount,
+        annualNhis,
+        monthlyNhis: nhisAmount,
+        annualNhf,
+        monthlyNhf: nhfAmount,
+        annualLifeInsurance,
+        monthlyLifeInsurance: lifeInsuranceAmount,
+        annualMortgage,
+        monthlyMortgage: mortgageAmount,
+        annualNetIncome,
+        monthlyNetIncome,
+        taxableIncome
+      };
+      
+      displayResults();
+      
+      document.getElementById('results').classList.remove('hidden');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function displayResults() {
+      const r = window.calculationResults;
+      if (!r) return;
+      
+      const isAnnual = viewMode === 'annual';
+      const formatCurrency = (amount) => '₦' + amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      const toggleButton = `
+        <button
+          onclick="toggleView()"
+          class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition flex items-center gap-2"
+        >
+          <span>🔄</span> View ${isAnnual ? 'Monthly' : 'Annual'}
+        </button>
+      `;
+      
+      document.getElementById('resultsContent').innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-2xl font-bold text-emerald-600">${isAnnual ? 'Annual' : 'Monthly'} Tax Breakdown</h4>
+          <div class="flex gap-2 no-print">
+            ${toggleButton}
+            <button
+              onclick="saveResults()"
+              class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
+            >
+              <span>💾</span> Save
+            </button>
+            <button
+              onclick="window.print()"
+              class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
+            >
+              <span>🖨️</span> Print
+            </button>
+          </div>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex justify-between py-3 border-b border-emerald-200">
+            <span class="text-gray-700 font-semibold">Gross Income:</span>
+            <span class="font-semibold">${formatCurrency(isAnnual ? r.annualGross : r.monthlyGross)}</span>
+          </div>
+          
+          <div class="bg-amber-50 p-4 rounded-lg mt-4 mb-4">
+            <h5 class="font-semibold text-amber-800 mb-3">Deductions Breakdown</h5>
+            <div class="space-y-2">
+              <div class="flex justify-between py-2">
+                <span class="text-gray-700">Pension (8%):</span>
+                <span class="font-semibold">${formatCurrency(isAnnual ? r.annualPension : r.monthlyPension)}</span>
+              </div>
+              ${r.annualNhis > 0 ? `
+              <div class="flex justify-between py-2">
+                <span class="text-gray-700">NHIS:</span>
+                <span class="font-semibold">${formatCurrency(isAnnual ? r.annualNhis : r.monthlyNhis)}</span>
+              </div>` : ''}
+              ${r.annualNhf > 0 ? `
+              <div class="flex justify-between py-2">
+                <span class="text-gray-700">NHF (2.5%):</span>
+                <span class="font-semibold">${formatCurrency(isAnnual ? r.annualNhf : r.monthlyNhf)}</span>
+              </div>` : ''}
+              ${r.annualLifeInsurance > 0 ? `
+              <div class="flex justify-between py-2">
+                <span class="text-gray-700">Life Insurance:</span>
+                <span class="font-semibold">${formatCurrency(isAnnual ? r.annualLifeInsurance : r.monthlyLifeInsurance)}</span>
+              </div>` : ''}
+              ${r.annualMortgage > 0 ? `
+              <div class="flex justify-between py-2">
+                <span class="text-gray-700">Mortgage Interest:</span>
+                <span class="font-semibold">${formatCurrency(isAnnual ? r.annualMortgage : r.monthlyMortgage)}</span>
+              </div>` : ''}
+            </div>
+          </div>
+          
+          <div class="flex justify-between py-3 border-b border-emerald-200">
+            <span class="text-gray-700 font-semibold">Taxable Income:</span>
+            <span class="font-semibold">${formatCurrency(isAnnual ? r.taxableIncome : r.taxableIncome / 12)}</span>
+          </div>
+          
+          <div class="flex justify-between py-3 border-b border-emerald-200 bg-red-50 px-4 rounded">
+            <span class="text-gray-700 font-semibold">PAYE Tax:</span>
+            <span class="font-semibold text-red-700">${formatCurrency(isAnnual ? r.annualTax : r.monthlyTax)}</span>
+          </div>
+          
+          <div class="flex justify-between py-4 text-lg bg-emerald-100 px-4 rounded-lg mt-4">
+            <span class="font-bold text-emerald-700">Net Income:</span>
+            <span class="font-bold text-emerald-700 text-xl">${formatCurrency(isAnnual ? r.annualNetIncome : r.monthlyNetIncome)}</span>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('printDate').textContent = 'Calculation Date: ' + new Date().toLocaleDateString('en-NG', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    
+    function toggleView() {
+      viewMode = viewMode === 'annual' ? 'monthly' : 'annual';
+      displayResults();
+    }
 
+  
+    
+ 
+
+    
  
        
           
