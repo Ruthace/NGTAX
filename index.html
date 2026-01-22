@@ -407,7 +407,7 @@
       const annualMortgage = mortgageAmount * 12;
       
       // Calculate taxable income (gross income only, no CRA)
-      const taxableIncome = annualGross;
+      const taxableIncome = annualGross - (annualPension + annualNhis + annualNhf + annualLifeInsurance + annualMortgage);
       
       // Calculate tax progressively on taxable income using NEW TAX LAW
       let annualTax = 0;
